@@ -1,5 +1,5 @@
-Zei API
-==================
+Zei PrestaShop API Plugin
+=========================
 
-[Documentation](http://docs.zei-world.com)
------------------------------------------------
+[Documentation (français)](https://docs.zei-world.com/#pluginsPrestaShop_fr)
+----------------------------------------------------------------------------
