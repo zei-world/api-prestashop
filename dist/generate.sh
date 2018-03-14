@@ -32,5 +32,6 @@ rsync -av --progress .. zei \
 zip -r ./zei-prestashop-latest.zip zei
 rm -r zei
 
+git add --all
 git commit -a -m "Envoi de la version ${version}"
 git tag $version
