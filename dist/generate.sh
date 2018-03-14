@@ -18,8 +18,6 @@ sed -i 's/'"$(cat .version)"'/'"$version"'/' ../config.xml
 
 echo $version > .version
 
-git tag $version
-
 rm ./zei-prestashop-latest.zip
 
 mkdir zei
@@ -32,5 +30,7 @@ rsync -av --progress .. zei \
     --exclude README.md
 
 zip -r ./zei-prestashop-latest.zip zei
-
 rm -r zei
+
+git commit -a -m "Envoi de la version ${version}"
+git tag $version
