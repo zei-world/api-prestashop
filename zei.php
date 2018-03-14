@@ -9,7 +9,7 @@ class ZEI extends Module {
     public function __construct() {
         $this->name = 'zei';
         $this->tab = 'zei_api';
-        $this->version = '1.4.1';
+        $this->version = '1.4.2';
         $this->author = 'Zei';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => _PS_VERSION_);
@@ -32,7 +32,7 @@ class ZEI extends Module {
             $this->registerHook('displayAdminProductsExtra') &&
             $this->registerHook('displayPaymentTop') &&
             $this->registerHook('displayOrderConfirmation') &&
-            $this->registerHook('actionOrderStatusUpdate')
+            $this->registerHook('actionOrderStatusPostUpdate')
 		;
     }
 
@@ -278,7 +278,7 @@ class ZEI extends Module {
         }
     }
 
-    public function hookActionOrderStatusUpdate($params) {
+    public function hookActionOrderStatusPostUpdate($params) {
         // Ordered by Zei User
         if(($order = new Order($params['id_order'])) && $order->zei_profile) {
             // Order not validated yet
@@ -288,7 +288,7 @@ class ZEI extends Module {
 
                 foreach($params['cart']->getProducts() as $index=>$cartProduct) {
                     if(($product = new Product($cartProduct['id_product'])) &&
-                        (!isset($validation[$index]) || $validation[$index] != 1)) {
+                        (!key_exists($index, $validation) || $validation[$index] != 1)) {
                         //PRODUCT PRIORITY BEFORE GLOBAL
                         $offerId = $product->zei_offer ? $product->zei_offer : ($globalOffer ? $globalOffer : null);
 
