@@ -64,9 +64,9 @@ class zei_api {
             ;
     }
 
-    static function validateOffer($offerId, $entity, $amount = 1) {
+    static function validateOffer($offerId, $entity, $units = 1) {
         if(preg_match("/^(u|c|o)\/[0-9]+$/", $entity)) {
-            return self::request('offers/'.$offerId.'/validate/'.$entity, array('amount' => $amount));
+            return self::request('offers/'.$offerId.'/validate/'.$entity, array('units' => $units));
         }
         if(self::$debug) var_dump('[ZEI] Entity syntax error : \"'.$entity.'\"');
         return false;
