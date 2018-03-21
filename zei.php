@@ -270,7 +270,7 @@ class ZEI extends Module {
     }
 
     public function hookDisplayOrderConfirmation($params) {
-        $keyParam = key_exists('order',$params) ? 'order' : 'objOrder';
+        $keyParam = key_exists('order', $params) ? 'order' : 'objOrder';
         if(($cookie = $_COOKIE["zei"]) && ($order = $params[$keyParam])) {
             $order->zei_profile = $cookie;
             $order->save();
@@ -279,29 +279,31 @@ class ZEI extends Module {
     }
 
     public function hookActionOrderStatusPostUpdate($params) {
-        // Ordered by Zei User
-        if(($order = new Order($params['id_order'])) && $order->zei_profile) {
-            // Order not validated yet
-            if($params['newOrderStatus']->paid) {
-                $validation = $order->zei_validation === '' ? [] : json_decode($order->zei_validation);
-                $globalOffer = Configuration::get('zei_global_offer');
+        if(key_exists("id_order", $params) && key_exists("newOrderStatus", $params) && key_exists("cart", $params)) {
+            // Ordered by Zei User
+            if(($order = new Order($params['id_order'])) && $order->zei_profile) {
+                // Order not validated yet
+                if($params['newOrderStatus']->paid) {
+                    $validation = $order->zei_validation === '' ? [] : json_decode($order->zei_validation);
+                    $globalOffer = Configuration::get('zei_global_offer');
 
-                foreach($params['cart']->getProducts() as $index=>$cartProduct) {
-                    if(($product = new Product($cartProduct['id_product'])) &&
-                        (!key_exists($index, $validation) || $validation[$index] != 1)) {
-                        //PRODUCT PRIORITY BEFORE GLOBAL
-                        $offerId = $product->zei_offer ? $product->zei_offer : ($globalOffer ? $globalOffer : null);
+                    foreach($params['cart']->getProducts() as $index => $cartProduct) {
+                        if(($product = new Product($cartProduct['id_product'])) &&
+                            (!key_exists($index, $validation) || $validation[$index] != 1)) {
+                            //PRODUCT PRIORITY BEFORE GLOBAL
+                            $offerId = $product->zei_offer ? $product->zei_offer : ($globalOffer ? $globalOffer : null);
 
-                        if($offerId) {
-                            $response = zei_api::validateOffer($offerId, $order->zei_profile, $cartProduct['quantity']);
-                            if (!$response) $validation[$index] = 0;
-                            elseif (isset($response['code'])) $validation[$index] = $response['code'];
-                            else $validation[$index] = 1;
+                            if($offerId) {
+                                $response = zei_api::validateOffer($offerId, $order->zei_profile, $cartProduct['quantity']);
+                                if (!$response) $validation[$index] = 0;
+                                elseif (isset($response['code'])) $validation[$index] = $response['code'];
+                                else $validation[$index] = 1;
+                            }
                         }
                     }
+                    $order->zei_validation = json_encode($validation);
+                    $order->save();
                 }
-                $order->zei_validation = json_encode($validation);
-                $order->save();
             }
         }
     }
