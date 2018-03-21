@@ -2,7 +2,7 @@
 <module>
 	<name>zei</name>
 	<displayName><![CDATA[Zei]]></displayName>
-	<version><![CDATA[1.4.3]]></version>
+	<version><![CDATA[1.4.4]]></version>
 	<description><![CDATA[Link your company offers and rewards from Zei !]]></description>
 	<author><![CDATA[Zei]]></author>
 	<tab><![CDATA[zei_api]]></tab>
