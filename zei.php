@@ -9,7 +9,7 @@ class ZEI extends Module {
     public function __construct() {
         $this->name = 'zei';
         $this->tab = 'zei_api';
-        $this->version = '1.4.4';
+        $this->version = '1.5.0';
         $this->author = 'Zei';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => _PS_VERSION_);
