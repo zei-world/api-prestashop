@@ -279,7 +279,7 @@ class ZEI extends Module {
     }
 
     public function hookActionOrderStatusPostUpdate($params) {
-        if(key_exists("id_order", $params) && key_exists("newOrderStatus", $params) && key_exists("cart", $params)) {
+        if(key_exists("id_order", $params) && key_exists("newOrderStatus", $params)) {
             // Ordered by Zei User
             if(($order = new Order($params['id_order'])) && $order->zei_profile) {
                 // Order not validated yet
@@ -287,7 +287,7 @@ class ZEI extends Module {
                     $validation = $order->zei_validation === '' ? [] : json_decode($order->zei_validation);
                     $globalOffer = Configuration::get('zei_global_offer');
 
-                    foreach($params['cart']->getProducts() as $index => $cartProduct) {
+                    foreach($order->getCartProducts() as $index => $cartProduct) {
                         if(($product = new Product($cartProduct['id_product'])) &&
                             (!key_exists($index, $validation) || $validation[$index] != 1)) {
                             //PRODUCT PRIORITY BEFORE GLOBAL
