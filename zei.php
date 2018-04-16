@@ -294,7 +294,7 @@ class ZEI extends Module {
                             $offerId = $product->zei_offer ? $product->zei_offer : ($globalOffer ? $globalOffer : null);
 
                             if($offerId) {
-                                $response = zei_api::validateOffer($offerId, $order->zei_profile, $cartProduct['quantity']);
+                                $response = zei_api::validateOffer($offerId, $order->zei_profile, $cartProduct['product_quantity']);
                                 if (!$response) $validation[$index] = 0;
                                 elseif (isset($response['code'])) $validation[$index] = $response['code'];
                                 else $validation[$index] = 1;
