@@ -3,6 +3,7 @@
 if(!defined('_PS_VERSION_')) exit;
 
 include "zei_api.php";
+include "zei_debugger.php";
 
 class ZEI extends Module {
 
@@ -23,6 +24,8 @@ class ZEI extends Module {
         $this->confirmUninstall = $this->l('Are you sure to remove your link with ZEI ?');
 
         if (!Configuration::get('ZEI')) $this->warning = $this->l('No name provided');
+
+        new zei_debugger();
     }
 
     public function install() {
@@ -271,11 +274,16 @@ class ZEI extends Module {
 
     public function hookDisplayOrderConfirmation($params) {
         $keyParam = key_exists('order', $params) ? 'order' : 'objOrder';
+
         if(($cookie = $_COOKIE["zei"]) && ($order = $params[$keyParam])) {
             $order->zei_profile = $cookie;
             $order->save();
-            unset($_COOKIE['zei']);
+            //unset($_COOKIE['zei']);
+            zei_debugger::send("[PRESTASHOP] [ORDER] User $cookie linked to order", $order);
+        } else {
+            zei_debugger::send("[PRESTASHOP] [ORDER] User $cookie NOT linked", $keyParam);
         }
+        
     }
 
     public function hookActionOrderStatusPostUpdate($params) {
@@ -301,9 +309,14 @@ class ZEI extends Module {
                             }
                         }
                     }
+                    zei_debugger::send("[PRESTASHOP] [STATUS] Saving validation :", $validation);
                     $order->zei_validation = json_encode($validation);
                     $order->save();
+                } else {
+                    zei_debugger::send("[PRESTASHOP] [STATUS] Wrong order status :", $order);
                 }
+            } else {
+                zei_debugger::send("[PRESTASHOP] [STATUS] Order not found :", $params);
             }
         }
     }

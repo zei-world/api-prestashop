@@ -2,16 +2,17 @@
 
 if(!defined('_PS_VERSION_')) exit;
 
+include "zei_debugger.php";
+
 class zei_api {
 
     private static $debug = false;
 
     private static $timeout = 2;
 
-    private static $api = "api.zei-world.com/v3/";
+    private static $api = "api.zei-world.com";
 
-    static private function request($path, $params = array()) {
-
+    static function request($path, $params = array()) {
         // Prestashop options
         $id = Configuration::get('zei_api_key');
         $secret = Configuration::get('zei_api_secret');
@@ -19,6 +20,16 @@ class zei_api {
 
         $url = $scheme."://".self::$api.$path."?id=".$id."&secret=".$secret;
         foreach($params as $param => $value) $url .= "&".$param."=".$value;
+
+        if(zei_debugger::$isLoaded) {
+            if(array_key_exists('zei', $_COOKIE)) {
+                $url .= '&debugUser=' . $_COOKIE['zei'];
+            }
+            if(zei_debugger::$hash !== null) {
+                $url .= '&debugHash=' . zei_debugger::$hash;
+            }
+        }
+
         $response = file_get_contents($url, false, stream_context_create([
             'http' => [ 'method' => "GET", 'timeout' => self::$timeout, 'ignore_errors' => true ],
             'ssl' => [ "verify_peer" => false, "verify_peer_name" => false ]
@@ -36,15 +47,29 @@ class zei_api {
     }
 
     public static function getOffersList() {
-        $request = self::request('offers/valid');
+        $request = self::request('/v3/offers/valid');
+
+        $response = array();
+
         if($request && $request['success'] && $offers = $request['message']) {
-            $list = array();
             foreach ($offers as $offerId => $offerData) {
-                $list[$offerId] = $offerData['name'];
+                $response[$offerId] = $offerData['name'];
             }
-            return $list;
         }
-        return null;
+
+        zei_debugger::send("[OFFERS] [LIST]", $response);
+
+        return $response;
+    }
+
+    static function validateOffer($offerId, $entity, $units = 1) {
+        if(preg_match("/^(u|c|o)\/[0-9]+$/", $entity)) {
+            $response = self::request('/v3/offers/'.$offerId.'/validate/'.$entity, array('units' => $units));
+            zei_debugger::send("[OFFERS] [VALIDATION]", $response);
+            return $response;
+        }
+        if(self::$debug) var_dump('[ZEI] Entity syntax error : \"'.$entity.'\"');
+        return false;
     }
 
     static function getScriptUrl($b2c = true, $b2b = true) {
@@ -64,11 +89,4 @@ class zei_api {
             ;
     }
 
-    static function validateOffer($offerId, $entity, $units = 1) {
-        if(preg_match("/^(u|c|o)\/[0-9]+$/", $entity)) {
-            return self::request('offers/'.$offerId.'/validate/'.$entity, array('units' => $units));
-        }
-        if(self::$debug) var_dump('[ZEI] Entity syntax error : \"'.$entity.'\"');
-        return false;
-    }
 }
