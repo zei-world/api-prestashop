@@ -68,6 +68,12 @@ class ZEI extends Module {
                 $output .= $this->displayError($this->l('Invalid HTTPS option'));
                 $error = true;
             }
+            
+            $debugger = strval(Tools::getValue('zei_api_debugger'));
+            if(!$error && ($debugger != 0 || $debugger != 1) && !Validate::isGenericName($debugger)) {
+                $output .= $this->displayError($this->l('Invalid debugger option'));
+                $error = true;
+            }
 
             if(!$error) {
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
@@ -75,6 +81,7 @@ class ZEI extends Module {
                 Configuration::updateValue('zei_api_key', $key);
                 Configuration::updateValue('zei_api_secret', $secret);
                 Configuration::updateValue('zei_api_https', $https);
+                Configuration::updateValue('zei_api_debugger', $debugger);
 
                 Configuration::updateValue('zei_global_offer', Tools::getValue('zei_global_offer'));
             }
@@ -138,6 +145,26 @@ class ZEI extends Module {
                             'label' => $this->l('Disabled')
                         )
                     )
+                ),
+                array(
+                    'type' => 'radio',
+                    'label' => $this->l('Enable debugger'),
+                    'desc' => 'Send more API log informations to solve problems.',
+                    'name' => 'zei_api_debugger',
+                    'required'  => true,
+                    'is_bool'   => true,
+                    'values'    => array(
+                        array(
+                            'id'    => 'zei_api_debugger_on',
+                            'value' => 1,
+                            'label' => $this->l('Enabled')
+                        ),
+                        array(
+                            'id'    => 'zei_api_debugger_off',
+                            'value' => 0,
+                            'label' => $this->l('Disabled')
+                        )
+                    )
                 )
             ),
             'submit' => array(
@@ -177,6 +204,9 @@ class ZEI extends Module {
 
         $https = Configuration::get('zei_api_https');
         $helper->fields_value['zei_api_https'] = ($https == 0 || $https == 1) ? $https : 1;
+
+        $debugger = Configuration::get('zei_api_debugger');
+        $helper->fields_value['zei_api_debugger'] = ($debugger == 0 || $debugger == 1) ? $debugger : 1;
 
         $helper->toolbar_btn = array(
             'save' => array(
@@ -264,6 +294,7 @@ class ZEI extends Module {
                 foreach($params['cart']->getProducts() as $cartProduct) {
                     if(($id = $cartProduct['id_product']) && ($product = new Product($id)) && $product->zei_offer) {
                         $this->context->smarty->assign(array('zei_script' => zei_api::getScriptUrl()));
+                        zei_debugger::send("[PRESTASHOP] [MODULE] Module is displayed");
                         return $this->display(__FILE__, 'views/module.tpl');
                     }
                 }
