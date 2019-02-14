@@ -19,14 +19,15 @@ class zei_api {
         $scheme = Configuration::get('zei_api_https') == "0" ? "http" : "https";
 
         $url = $scheme."://".self::$api.$path."?id=".$id."&secret=".$secret;
-        foreach($params as $param => $value) $url .= "&".$param."=".$value;
+        foreach($params as $param => $value) $url .= "&" . $param . "=" . urlencode($value);
 
-        if(zei_debugger::$isLoaded) {
+        if(zei_debugger::isEnabled()) {
             if(array_key_exists('zei', $_COOKIE)) {
                 $url .= '&debugUser=' . $_COOKIE['zei'];
             }
-            if(zei_debugger::$hash !== null) {
-                $url .= '&debugHash=' . zei_debugger::$hash;
+            $hash = zei_debugger::getHash();
+            if($hash !== null) {
+                $url .= '&debugHash=' . $hash;
             }
         }
 
@@ -78,7 +79,7 @@ class zei_api {
         // Prestashop options
         $id = Configuration::get('zei_api_key');
 
-        return "//".self::$api.'js'.
+        return "//".self::$api.'/v3/js'.
             '?id=' . $id .
             '&b2c=' . ($b2c ? 1 : 0).
             '&b2b=' . ($b2b ? 1 : 0).
