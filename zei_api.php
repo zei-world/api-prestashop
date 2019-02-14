@@ -2,7 +2,7 @@
 
 if(!defined('_PS_VERSION_')) exit;
 
-include "zei_debugger.php";
+include_once "zei_debugger.php";
 
 class zei_api {
 

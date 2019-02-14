@@ -2,15 +2,15 @@
 
 if(!defined('_PS_VERSION_')) exit;
 
-include "zei_api.php";
-include "zei_debugger.php";
+include_once "zei_api.php";
+include_once "zei_debugger.php";
 
 class ZEI extends Module {
 
     public function __construct() {
         $this->name = 'zei';
         $this->tab = 'zei_api';
-        $this->version = '1.5.1';
+        $this->version = '1.6.0';
         $this->author = 'Zei';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => _PS_VERSION_);
